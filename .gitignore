@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# OpenClaw internal
+.openclaw/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

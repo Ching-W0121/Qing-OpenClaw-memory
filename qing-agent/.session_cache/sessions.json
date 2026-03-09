@@ -1,0 +1,17 @@
+{
+  "last_updated": 1772944896.5431466,
+  "sessions": [
+    {
+      "session_id": "session_e551060743cb",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "cookies": {},
+      "created_at": 1772944896.5431466,
+      "last_used_at": 1772944896.5431466,
+      "visit_count": 1,
+      "total_active_seconds": 0.0,
+      "avg_session_duration": 0.0,
+      "avg_pages_per_session": 0.0,
+      "preferred_keywords": []
+    }
+  ]
+}
