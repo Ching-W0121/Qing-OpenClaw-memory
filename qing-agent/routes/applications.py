@@ -1,11 +1,13 @@
 """
-routes/applications.py - 投递路由
+routes/applications.py - 投递路由 (JWT 认证版)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
+
+from auth.jwt_auth import get_current_user, require_auth
 
 router = APIRouter(prefix="/api/applications", tags=["投递"])
 
@@ -19,8 +21,14 @@ class SubmitApplicationRequest(BaseModel):
 _applications_db = []
 
 @router.post("/submit")
-async def submit_application(request: SubmitApplicationRequest):
-    """提交投递"""
+async def submit_application(
+    request: SubmitApplicationRequest,
+    current_user: Dict = Depends(require_auth("write:jobs")),
+):
+    """
+    提交投递
+    需要权限：write:jobs
+    """
     from platform.adapter_factory import AdapterFactory
     
     # 获取职位详情（模拟）
@@ -49,11 +57,18 @@ async def submit_application(request: SubmitApplicationRequest):
         "job_id": request.job_id,
         "user_id": request.user_id,
         "result": result,
+        "auth_user": current_user.get("email"),
     }
 
 @router.get("/{user_id}")
-async def get_applications(user_id: str):
-    """获取投递记录"""
+async def get_applications(
+    user_id: str,
+    current_user: Dict = Depends(require_auth("read:users")),
+):
+    """
+    获取投递记录
+    需要权限：read:users
+    """
     user_apps = [app for app in _applications_db if app["user_id"] == user_id]
     
     return {
@@ -61,4 +76,5 @@ async def get_applications(user_id: str):
         "user_id": user_id,
         "count": len(user_apps),
         "applications": user_apps,
+        "auth_user": current_user.get("email"),
     }

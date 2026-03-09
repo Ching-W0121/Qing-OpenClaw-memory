@@ -1,10 +1,12 @@
 """
-routes/matches.py - 匹配路由
+routes/matches.py - 匹配路由 (JWT 认证版)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
+
+from auth.jwt_auth import get_current_user, require_auth
 
 router = APIRouter(prefix="/api/matches", tags=["匹配"])
 
@@ -39,8 +41,14 @@ class MatchRequest(BaseModel):
     jobs: List[Job]
 
 @router.post("/calculate")
-async def calculate_match(request: MatchRequest):
-    """计算匹配度"""
+async def calculate_match(
+    request: MatchRequest,
+    current_user: Dict = Depends(require_auth("read:jobs")),
+):
+    """
+    计算匹配度
+    需要权限：read:jobs
+    """
     from tools.matcher import MatchingEngine
     from tools.recommender import Recommender
     
@@ -99,12 +107,19 @@ async def calculate_match(request: MatchRequest):
         "status": "success",
         "count": len(results),
         "matches": results,
+        "auth_user": current_user.get("email"),
     }
 
 @router.get("/recommend/{user_id}")
-async def get_recommendations(user_id: str, top_n: int = 10):
-    """获取推荐职位"""
-    # 模拟数据
+async def get_recommendations(
+    user_id: str,
+    top_n: int = 10,
+    current_user: Dict = Depends(require_auth("read:jobs")),
+):
+    """
+    获取推荐职位
+    需要权限：read:jobs
+    """
     return {
         "status": "success",
         "user_id": user_id,
@@ -125,4 +140,5 @@ async def get_recommendations(user_id: str, top_n: int = 10):
                 "level": "很好匹配",
             },
         ],
+        "auth_user": current_user.get("email"),
     }

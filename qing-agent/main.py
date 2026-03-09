@@ -1,5 +1,5 @@
 """
-FastAPI 入口 - v1.2
+FastAPI 入口 - v1.3 (JWT 认证版)
 """
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -9,8 +9,8 @@ from datetime import datetime
 # 创建 FastAPI 应用
 app = FastAPI(
     title="求职 Agent API",
-    description="产品级求职 Agent 系统 - v1.2",
-    version="1.2.0",
+    description="产品级求职 Agent 系统 - v1.3 (支持 JWT 认证)",
+    version="1.3.0",
 )
 
 # CORS 配置
@@ -39,10 +39,11 @@ async def shutdown_event():
 async def root():
     """根路径"""
     return {
-        "message": "求职 Agent API v1.2.0",
-        "version": "1.2.0",
+        "message": "求职 Agent API v1.3.0 (支持 JWT 认证)",
+        "version": "1.3.0",
         "status": "running",
         "docs": "/docs",
+        "auth_docs": "/auth/docs",
         "endpoints": {
             "users": "/api/users",
             "jobs": "/api/jobs",
@@ -63,20 +64,44 @@ async def health_check():
     
     return {
         "status": "healthy",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "timestamp": datetime.now().isoformat(),
         "components": {
             "circuit_breaker": cb.state.value,
             "limiter": "ok",
+            "jwt_auth": "enabled",
         },
     }
 
-# 注册路由
+@app.get("/auth/docs")
+async def auth_docs():
+    """JWT 认证文档"""
+    return {
+        "title": "JWT 认证文档",
+        "version": "1.3.0",
+        "auth0_domain": "qing-personal-domain.au.auth0.com",
+        "api_audience": "https://qing-agent-api",
+        "algorithm": "RS256",
+        "jwks_url": "https://qing-personal-domain.au.auth0.com/.well-known/jwks.json",
+        "permissions": {
+            "read:jobs": "读取职位信息",
+            "write:jobs": "写入职位信息/投递",
+            "read:users": "读取用户信息",
+            "write:users": "写入用户信息",
+        },
+        "usage": {
+            "header": "Authorization: Bearer YOUR_ACCESS_TOKEN",
+            "example": "curl -H 'Authorization: Bearer TOKEN' http://127.0.0.1:8000/api/jobs/search",
+        },
+    }
+
+# 注册路由（带 JWT 认证）
 from routes.users import router as users_router
 from routes.jobs import router as jobs_router
 from routes.matches import router as matches_router
 from routes.applications import router as applications_router
 
+# 所有 API 路由现在都受 JWT 保护
 app.include_router(users_router)
 app.include_router(jobs_router)
 app.include_router(matches_router)

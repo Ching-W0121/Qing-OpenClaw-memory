@@ -35,3 +35,14 @@ BOSS_EXCLUDE_DISTRICTS = os.getenv("BOSS_EXCLUDE_DISTRICTS", "宝安区").split(
 # 限流配置
 SEARCH_LIMIT_PER_HOUR = int(os.getenv("SEARCH_LIMIT_PER_HOUR", 10))
 JOB_DETAIL_LIMIT_PER_DAY = int(os.getenv("JOB_DETAIL_LIMIT_PER_DAY", 30))
+
+# Auth0 JWT 认证配置
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "qing-personal-domain.au.auth0.com")
+AUTH0_CLIENT_ID = os.getenv("AUTH0_CLIENT_ID", "")
+AUTH0_CLIENT_SECRET = os.getenv("AUTH0_CLIENT_SECRET", "")
+AUTH0_API_AUDIENCE = os.getenv("AUTH0_API_AUDIENCE", "https://qing-agent-api")
+AUTH0_ALGORITHM = os.getenv("AUTH0_ALGORITHM", "RS256")
+AUTH0_JWKS_URL = os.getenv("AUTH0_JWKS_URL", f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
+
+# JWT 开关（开发环境可关闭）
+JWT_ENABLED = os.getenv("JWT_ENABLED", "True").lower() == "true"

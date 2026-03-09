@@ -1,10 +1,12 @@
 """
-routes/jobs.py - 职位路由
+routes/jobs.py - 职位路由 (JWT 认证版)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
+
+from auth.jwt_auth import get_current_user, require_auth, jwt_auth
 
 router = APIRouter(prefix="/api/jobs", tags=["职位"])
 
@@ -15,8 +17,14 @@ class SearchRequest(BaseModel):
     page: int = 1
 
 @router.post("/search")
-async def search_jobs(request: SearchRequest):
-    """搜索职位"""
+async def search_jobs(
+    request: SearchRequest,
+    current_user: Dict = Depends(require_auth("read:jobs")),
+):
+    """
+    搜索职位
+    需要权限：read:jobs
+    """
     from platform.adapter_factory import AdapterFactory
     
     # 使用智联招聘适配器（BOSS 直聘账号封禁中）
@@ -34,11 +42,18 @@ async def search_jobs(request: SearchRequest):
         "keyword": request.keyword,
         "city": request.city,
         "jobs": jobs,
+        "user": current_user.get("email"),
     }
 
 @router.get("/{job_id}")
-async def get_job_detail(job_id: str):
-    """获取职位详情"""
+async def get_job_detail(
+    job_id: str,
+    current_user: Dict = Depends(require_auth("read:jobs")),
+):
+    """
+    获取职位详情
+    需要权限：read:jobs
+    """
     # 模拟数据
     return {
         "job_id": job_id,
@@ -56,4 +71,5 @@ async def get_job_detail(job_id: str):
             "description": "负责品牌策划相关工作...",
             "url": f"https://example.com/job/{job_id}",
         },
+        "user": current_user.get("email"),
     }
