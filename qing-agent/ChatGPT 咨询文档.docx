@@ -1,0 +1,612 @@
+# 求职 Agent 系统 - ChatGPT 咨询文档
+
+**咨询日期**: 2026-03-10  
+**系统版本**: v1.3.0 (JWT 认证版)  
+**咨询对象**: ChatGPT (GPT-5.3)  
+**优先级**: 高
+
+---
+
+## 一、项目背景
+
+### 1.1 项目简介
+
+**项目名称**: 求职 Agent 系统 (Qing Agent)
+
+**目标**: 为求职者提供智能职位搜索、匹配推荐、投递管理服务
+
+**技术栈**:
+- 后端：Python 3.11 + FastAPI
+- 认证：Auth0 JWT (RS256)
+- 数据库：SQLite 3.52.0 (待集成)
+- 平台：BOSS 直聘、智联招聘
+
+### 1.2 核心功能
+
+| 功能模块 | 说明 | 状态 |
+|----------|------|------|
+| 用户画像管理 | 简历解析、技能提取、期望配置 | ✅ 完成 |
+| 多平台搜索 | BOSS 直聘、智联招聘职位搜索 | ⚠️ BOSS 受限 |
+| 智能匹配 | 7 维度匹配算法 (行业/技能/经验/薪资/地点/学历/工具) | ✅ 完成 |
+| 推荐排序 | Top N 推荐，匹配度排序 | ✅ 完成 |
+| 投递管理 | 投递记录追踪、状态管理 | ✅ 完成 |
+| 防封禁保护 | 熔断器、限流器、会话管理 | ✅ 完成 |
+| JWT 认证 | Auth0 集成，权限控制 | ✅ 完成 |
+| 数据持久化 | SQLite 数据库 | ❌ 待开发 |
+
+### 1.3 项目进度
+
+| 阶段 | 内容 | 状态 | 完成时间 |
+|------|------|------|----------|
+| 阶段 1 | MVP 核心功能 | ✅ 100% | 2026-03-08 |
+| 阶段 2 | 多平台适配 | ✅ 100% | 2026-03-08 |
+| 阶段 3 | 防封禁保护 | ✅ 100% | 2026-03-08 |
+| 阶段 4 | 产品级 API | ✅ 100% | 2026-03-08 |
+| 阶段 5 | JWT 认证 | ✅ 100% | 2026-03-09 |
+| **阶段 6** | **SQLite 数据库** | **❌ 0%** | **待执行** |
+| 阶段 7 | 前端 UI | ❌ 0% | 待执行 |
+
+**总体进度**: 75% 完成
+
+---
+
+## 二、当前系统状态
+
+### 2.1 技术架构
+
+```
+┌─────────────────────────────────────────────────┐
+│                  FastAPI Application             │
+│                   (main.py v1.3.0)              │
+├─────────────────────────────────────────────────┤
+│  Auth Layer         │  Routes                   │
+│  - JWTAuth          │  - /api/users            │
+│  - Auth0 RS256      │  - /api/jobs             │
+│  - Permissions      │  - /api/matches          │
+│                     │  - /api/applications     │
+├─────────────────────────────────────────────────┤
+│  Services Layer                                 │
+│  - UserService      │  - MatchService          │
+│  - JobService       │  - ApplicationService    │
+├─────────────────────────────────────────────────┤
+│  Platform Adapters                              │
+│  - BossAdapter      │  - ZhilianAdapter        │
+│  (⚠️ 受限)           │  (✅ 可用)                │
+├─────────────────────────────────────────────────┤
+│  Tools                                          │
+│  - Matcher (7 维)   │  - CircuitBreaker        │
+│  - JDParser         │  - OperationLimiter      │
+│  - ResumeParser     │  - SessionManager        │
+├─────────────────────────────────────────────────┤
+│  ⚠️ CURRENT: In-Memory Storage (dict)          │
+│  ❌ PROBLEM: Data lost on restart              │
+│  ✅ TARGET: SQLite Database                    │
+└─────────────────────────────────────────────────┘
+```
+
+### 2.2 当前数据存储方式
+
+**问题**: 使用 Python dict 内存存储
+
+```python
+# 当前实现 (伪代码)
+_users = {}  # user_id → user dict
+_jobs = {}   # job_id → job dict
+_matches = {}  # match_id → match dict
+_applications = {}  # app_id → application dict
+
+# 问题:
+# 1. 重启后数据丢失
+# 2. 无法持久化追踪投递历史
+# 3. 无法进行复杂查询
+# 4. 多线程不安全
+```
+
+### 2.3 代码统计
+
+| 指标 | 数值 |
+|------|------|
+| 总文件数 | 87 个 |
+| 代码行数 | ~4500 行 |
+| 测试覆盖率 | ~88% |
+| API 端点数 | 10 个 |
+| 适配器数 | 2 个 |
+
+---
+
+## 三、遇到的问题
+
+### 3.1 核心问题：数据持久化缺失
+
+**现状**:
+- 所有数据存储在内存 dict 中
+- 服务重启后数据全部丢失
+- 无法追踪历史投递记录
+- 无法进行数据分析
+
+**影响**:
+- 🔴 高：用户每次重启需重新创建画像
+- 🔴 高：投递记录无法持久化
+- 🟡 中：无法进行匹配历史分析
+- 🟡 中：无法实现数据备份/恢复
+
+### 3.2 技术挑战
+
+| 挑战 | 难度 | 说明 |
+|------|------|------|
+| Schema 设计 | 🟡 中 | 需要合理设计 4 张表及关系 |
+| ORM 迁移 | 🟡 中 | dict → SQLAlchemy 模型 |
+| 连接池配置 | 🟢 低 | SQLite 多线程安全 |
+| 数据迁移 | 🟢 低 | 可选：迁移现有内存数据 |
+| 查询优化 | 🟡 中 | 索引、缓存策略 |
+
+### 3.3 BOSS 直聘限制问题
+
+**问题**: BOSS 直聘网页端强制要求下载 APP
+
+**测试结果**:
+- ✅ 页面能正常访问 (状态码 200)
+- ✅ 账号已登录，无验证码
+- ❌ 搜索结果显示"没有找到相关职位，打开 APP 查看"
+
+**影响**:
+- BOSS 直聘适配器无法实际使用
+- 需依赖智联招聘作为主要平台
+- 或考虑 APP 自动化方案 (Appium)
+
+---
+
+## 四、需要请教的问题
+
+### 4.1 SQLite 数据库设计 (核心需求)
+
+#### 问题 1: 数据库 Schema 设计
+
+**需求**:
+
+设计 4 张核心表，支持求职 Agent 的完整业务流程。
+
+**表结构建议**:
+
+```sql
+-- 用户表
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    phone TEXT,
+    resume_data JSON,  -- 简历解析结果
+    skills JSON,       -- 技能列表
+    expectations JSON, -- 期望配置 (行业/薪资/地点)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 职位表
+CREATE TABLE jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    platform TEXT NOT NULL,  -- 'boss' | 'zhilian'
+    job_id TEXT UNIQUE NOT NULL,  -- 平台职位 ID
+    title TEXT NOT NULL,
+    company TEXT,
+    salary_min INTEGER,
+    salary_max INTEGER,
+    location TEXT,
+    district TEXT,
+    experience TEXT,
+    education TEXT,
+    description TEXT,
+    requirements JSON,  -- 职位要求解析结果
+    skills JSON,        -- 职位技能关键词
+    industry TEXT,
+    url TEXT,
+    crawled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 匹配记录表
+CREATE TABLE matches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    job_id INTEGER NOT NULL,
+    match_score REAL NOT NULL,  -- 匹配度 (0-1)
+    match_details JSON,  -- 各维度匹配详情
+    rank INTEGER,        -- 推荐排名
+    is_viewed BOOLEAN DEFAULT FALSE,
+    is_applied BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id)
+);
+
+-- 投递记录表
+CREATE TABLE applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    job_id INTEGER NOT NULL,
+    match_id INTEGER,
+    status TEXT DEFAULT 'pending',  -- pending/submitted/interview/offers/rejected
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id),
+    FOREIGN KEY (match_id) REFERENCES matches(id)
+);
+
+-- 索引
+CREATE INDEX idx_jobs_platform ON jobs(platform);
+CREATE INDEX idx_jobs_location ON jobs(location);
+CREATE INDEX idx_matches_user ON matches(user_id);
+CREATE INDEX idx_matches_score ON matches(match_score DESC);
+CREATE INDEX idx_applications_user ON applications(user_id);
+CREATE INDEX idx_applications_status ON applications(status);
+```
+
+**请教**:
+1. 这个 schema 设计是否合理？
+2. 是否需要添加其他表 (如搜索历史、操作日志)？
+3. JSON 字段的使用是否合适？是否需要规范化？
+4. 索引设计是否足够？
+
+---
+
+#### 问题 2: SQLAlchemy ORM 模型
+
+**需求**:
+
+将现有的内存 dict 迁移到 SQLAlchemy ORM 模型。
+
+**当前代码示例**:
+
+```python
+# 当前内存存储
+class UserService:
+    def __init__(self):
+        self._users = {}
+    
+    def create_user(self, user_data: dict) -> dict:
+        user_id = str(uuid.uuid4())
+        self._users[user_id] = {
+            "id": user_id,
+            **user_data,
+            "created_at": datetime.now()
+        }
+        return self._users[user_id]
+    
+    def get_user(self, user_id: str) -> Optional[dict]:
+        return self._users.get(user_id)
+```
+
+**目标代码**:
+
+```python
+# 期望的 ORM 实现
+from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey
+from sqlalchemy.orm import relationship, declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True)
+    phone = Column(String)
+    resume_data = Column(JSON)
+    skills = Column(JSON)
+    expectations = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关系
+    matches = relationship("Match", back_populates="user", lazy="select")
+    applications = relationship("Application", back_populates="user", lazy="select")
+```
+
+**请教**:
+1. ORM 模型设计是否合理？
+2. 如何优雅地从 dict 迁移到 ORM？
+3. 是否需要使用数据类 (dataclass) 或 Pydantic 模型？
+4. 如何处理 JSON 字段的序列化和反序列化？
+
+---
+
+#### 问题 3: 数据库连接与连接池
+
+**需求**:
+
+配置 SQLite 连接，支持多线程安全访问。
+
+**当前问题**:
+
+```python
+# 问题代码
+engine = create_engine("sqlite:///./data/qing_agent.db")
+
+# 多线程访问时可能出现:
+# sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in the same thread
+```
+
+**期望配置**:
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+# SQLite 连接配置
+engine = create_engine(
+    "sqlite:///./data/qing_agent.db",
+    connect_args={"check_same_thread": False},  # 允许跨线程
+    pool_pre_ping=True,  # 连接前检查
+    pool_size=10,        # 连接池大小
+    max_overflow=20,     # 最大溢出连接数
+)
+
+# 线程安全会话
+SessionLocal = scoped_session(sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+))
+```
+
+**请教**:
+1. SQLite 连接池配置是否合理？
+2. `check_same_thread=False` 是否安全？
+3. 是否需要使用 `scoped_session`？
+4. 在 FastAPI 中如何最佳实践地管理数据库会话？
+
+---
+
+#### 问题 4: FastAPI 依赖注入
+
+**需求**:
+
+在 FastAPI 中优雅地注入数据库会话。
+
+**期望实现**:
+
+```python
+# database.py
+from fastapi import Depends
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# routes/users.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+router = APIRouter()
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+```
+
+**请教**:
+1. 依赖注入模式是否正确？
+2. 是否需要添加数据库中间件？
+3. 如何处理事务管理？
+4. 错误处理最佳实践？
+
+---
+
+#### 问题 5: 数据迁移脚本
+
+**需求**:
+
+如果现有内存数据需要迁移到 SQLite。
+
+**场景**:
+
+```python
+# 假设有现有内存数据
+existing_users = {
+    "user_1": {"name": "张三", "email": "zhangsan@example.com", ...},
+    "user_2": {"name": "李四", "email": "lisi@example.com", ...},
+}
+
+# 需要迁移到 SQLite
+```
+
+**期望脚本**:
+
+```python
+# migrate.py
+from sqlalchemy.orm import Session
+from models import User
+
+def migrate_users(db: Session, existing_data: dict):
+    for user_id, user_data in existing_data.items():
+        user = User(
+            id=user_id,
+            name=user_data["name"],
+            email=user_data["email"],
+            # ...
+        )
+        db.add(user)
+    db.commit()
+```
+
+**请教**:
+1. 数据迁移脚本如何编写？
+2. 是否需要使用 Alembic 进行版本管理？
+3. 如何处理主键冲突？
+4. 迁移过程中如何保证数据一致性？
+
+---
+
+### 4.2 BOSS 直聘问题 (次要需求)
+
+#### 问题 6: BOSS 直聘爬虫策略
+
+**问题**: BOSS 直聘网页端强制要求下载 APP，无法获取职位数据
+
+**已尝试**:
+- OpenClaw browser 工具 (浏览器自动化)
+- HTTP 请求 + BeautifulSoup
+- 已登录账号测试
+
+**结果**: 都失败，页面显示"没有找到相关职位，打开 APP 查看"
+
+**请教**:
+1. 是否有其他方法获取 BOSS 直聘职位数据？
+2. 是否有官方 API 或第三方数据源？
+3. APP 自动化 (Appium) 是否可行？复杂度如何？
+4. 是否有替代平台推荐 (前程无忧、猎聘网等)？
+
+---
+
+## 五、期望输出
+
+### 5.1 代码交付物
+
+希望 ChatGPT 提供以下代码：
+
+| 文件 | 说明 | 优先级 |
+|------|------|--------|
+| `database/db.py` | 数据库连接配置 | 🔴 高 |
+| `database/models.py` | SQLAlchemy ORM 模型 | 🔴 高 |
+| `database/session.py` | 会话管理 | 🔴 高 |
+| `routes/users.py` | 用户路由 (DB 版) | 🔴 高 |
+| `services/user_service.py` | 用户服务 (DB 版) | 🔴 高 |
+| `migrate.py` | 数据迁移脚本 | 🟡 中 |
+| `alembic.ini` | Alembic 配置 | 🟡 中 |
+
+### 5.2 文档交付物
+
+| 文档 | 说明 |
+|------|------|
+| Schema 设计说明 | 表结构、关系、索引说明 |
+| 迁移指南 | 从内存到 SQLite 的迁移步骤 |
+| 最佳实践 | FastAPI + SQLAlchemy 使用指南 |
+
+### 5.3 测试要求
+
+- ✅ 单元测试覆盖率 ≥85%
+- ✅ 集成测试通过
+- ✅ 多线程安全测试
+- ✅ 事务回滚测试
+
+---
+
+## 六、技术约束
+
+### 6.1 必须满足
+
+- Python 3.11+
+- FastAPI 0.100+
+- SQLAlchemy 2.0+
+- SQLite 3.52.0+
+- 兼容现有 JWT 认证
+
+### 6.2 最好满足
+
+- 异步支持 (async/await)
+- 连接池配置
+- 事务管理
+- 错误处理
+
+### 6.3 不需要
+
+- PostgreSQL/MySQL 支持 (暂不考虑)
+- Redis 缓存 (阶段 7 再考虑)
+- Docker 容器化 (阶段 8 再考虑)
+
+---
+
+## 七、项目文件结构
+
+```
+qing-agent/
+├── main.py                     # FastAPI 入口 ✅
+├── requirements.txt            # 依赖列表 ✅
+├── .env                        # 环境变量 ✅
+├── README.md                   # 项目说明 ✅
+│
+├── auth/                       # JWT 认证 ✅
+│   ├── __init__.py
+│   └── jwt_auth.py
+│
+├── routes/                     # API 路由 ✅
+│   ├── users.py                # 待更新 (DB 版)
+│   ├── jobs.py                 # 待更新 (DB 版)
+│   ├── matches.py              # 待更新 (DB 版)
+│   └── applications.py         # 待更新 (DB 版)
+│
+├── services/                   # 业务服务 ✅
+│   ├── user_service.py         # 待更新 (DB 版)
+│   ├── job_service.py          # 待更新 (DB 版)
+│   ├── match_service.py        # ✅
+│   └── application_service.py  # 待更新 (DB 版)
+│
+├── platform/                   # 平台适配器 ✅
+│   ├── base_adapter.py
+│   ├── boss_adapter.py         # ⚠️ 受限
+│   ├── zhilian_adapter.py      # ✅ 可用
+│   └── adapter_factory.py
+│
+├── tools/                      # 核心工具 ✅
+│   ├── matcher.py
+│   ├── jd_parser.py
+│   ├── resume_parser.py
+│   ├── circuit_breaker.py
+│   ├── operation_limiter.py
+│   └── session_manager.py
+│
+├── database/                   # 数据库 ⏳ 待开发
+│   ├── __init__.py             # 待创建
+│   ├── db.py                   # 待创建 (连接配置)
+│   ├── models.py               # 待创建 (ORM 模型)
+│   └── session.py              # 待创建 (会话管理)
+│
+├── tests/                      # 测试套件 ✅
+│   ├── test_integration.py
+│   ├── test_jwt_auth.py
+│   └── test_database.py        # 待创建
+│
+└── config/
+    └── settings.py             # 配置 ✅
+```
+
+---
+
+## 八、时间计划
+
+| 任务 | 预计时间 | 状态 |
+|------|----------|------|
+| Schema 设计 | 1 小时 | 待执行 |
+| ORM 模型实现 | 2 小时 | 待执行 |
+| 连接池配置 | 1 小时 | 待执行 |
+| 路由更新 | 2 小时 | 待执行 |
+| 服务层更新 | 2 小时 | 待执行 |
+| 测试编写 | 2 小时 | 待执行 |
+| 数据迁移 | 1 小时 | 待执行 |
+
+**总计**: 11 小时
+
+**期望完成日期**: 2026-03-17
+
+---
+
+## 九、联系方式
+
+**项目维护者**: 青 (Qing)  
+**GitHub**: https://github.com/Ching-W0121/Qing-OpenClaw-memory  
+**仓库**: https://github.com/Ching-W0121/Qing-SQLite  
+
+---
+
+**文档版本**: v1.0  
+**创建日期**: 2026-03-10  
+**最后更新**: 2026-03-10 15:50
