@@ -1,157 +1,48 @@
 """
-职位服务
+职位服务 - v1.4 (使用 Repository Layer)
 """
 
-from platform.adapter_factory import AdapterFactory
-from database.cache import cache
-from database.db import get_db
-from database import models
-from datetime import datetime
+from typing import Optional, List, Dict, Any
+from sqlalchemy.orm import Session
+from repositories.job_repo import JobRepository
+from database.models import Job
+
 
 class JobService:
-    """职位服务"""
+    """职位服务（v1.4 版 - 使用 Repository）"""
     
-    def __init__(self):
-        self.adapters = {}
+    def __init__(self, db: Session):
+        self.db = db
+        self.job_repo = JobRepository(db)
     
-    def _get_adapter(self, platform):
-        """获取平台适配器（单例）"""
-        if platform not in self.adapters:
-            self.adapters[platform] = AdapterFactory.get_adapter(platform)
-        return self.adapters[platform]
+    def get_job(self, job_id: int) -> Optional[Job]:
+        """获取职位"""
+        return self.job_repo.get(job_id)
     
-    async def search(self, keyword, city=None, platforms=None):
-        """
-        搜索职位（多平台）
-        
-        Args:
-            keyword: 搜索关键词
-            city: 城市
-            platforms: 平台列表，默认 ["boss"]
-        
-        Returns:
-            list: 职位列表
-        """
-        if platforms is None:
-            platforms = ["boss"]
-        
-        all_jobs = []
-        
-        for platform in platforms:
-            # 检查缓存
-            cache_key = f"search:{platform}:{keyword}:{city}"
-            cached = cache.get(cache_key)
-            
-            if cached:
-                print(f"✅ 缓存命中：{cache_key}")
-                all_jobs.extend(cached)
-                continue
-            
-            # 搜索
-            adapter = self._get_adapter(platform)
-            jobs = await adapter.search_jobs(keyword, city)
-            
-            # 缓存 1 小时
-            cache.set(cache_key, jobs, use_ttl=True)
-            
-            all_jobs.extend(jobs)
-        
-        return all_jobs
+    def get_job_by_platform_id(self, platform: str, source_platform_id: str) -> Optional[Job]:
+        """根据平台 ID 获取职位"""
+        return self.job_repo.get_by_platform_id(platform, source_platform_id)
     
-    async def parse_details(self, jobs):
-        """
-        批量解析职位详情
-        
-        Args:
-            jobs: 职位列表
-        
-        Returns:
-            list: 解析后的职位详情
-        """
-        parsed = []
-        
-        for job in jobs:
-            # 检查缓存
-            cache_key = f"job:{job['platform']}:{job.get('url', job.get('id'))}"
-            cached = cache.get(cache_key)
-            
-            if cached:
-                parsed.append(cached)
-                continue
-            
-            # 解析详情
-            adapter = self._get_adapter(job['platform'])
-            detail = await adapter.get_job_detail(job['url'])
-            
-            # 合并数据
-            job.update(detail)
-            
-            # 缓存 24 小时
-            cache.set(cache_key, job, use_ttl=True)
-            
-            parsed.append(job)
-        
-        return parsed
+    def create_job(self, data: Dict[str, Any]) -> Job:
+        """创建职位"""
+        return self.job_repo.create(data)
     
-    async def apply(self, job, user_id):
-        """
-        申请职位
-        
-        Args:
-            job: 职位 dict
-            user_id: 用户 ID
-        
-        Returns:
-            dict: 投递结果
-        """
-        adapter = self._get_adapter(job['platform'])
-        
-        # 获取用户简历
-        resume = await self._get_user_resume(user_id)
-        
-        # 执行投递
-        result = await adapter.apply(job['url'], resume)
-        
-        # 保存投递记录
-        await self._save_application(user_id, job, result)
-        
-        return result
+    def create_or_update_job(self, data: Dict[str, Any]) -> Job:
+        """创建或更新职位（去重）"""
+        return self.job_repo.create_or_update(data)
     
-    async def _get_user_resume(self, user_id):
-        """获取用户简历"""
-        db = next(get_db())
-        user = db.query(models.User).filter(models.User.id == user_id).first()
-        
-        if not user:
-            raise ValueError(f"用户不存在：{user_id}")
-        
-        return user.resume_file
+    def search_by_title(self, keyword: str, limit: int = 50) -> List[Job]:
+        """根据标题搜索职位"""
+        return self.job_repo.search_by_title(keyword, limit)
     
-    async def _save_application(self, user_id, job, result):
-        """保存投递记录"""
-        db = next(get_db())
-        
-        # 查找或创建职位记录
-        job_record = db.query(models.Job).filter(models.Job.url == job['url']).first()
-        if not job_record:
-            job_record = models.Job(
-                title=job.get('title', ''),
-                company=job.get('company', ''),
-                city=job.get('city', ''),
-                platform=job.get('platform', ''),
-                url=job.get('url', ''),
-            )
-            db.add(job_record)
-            db.commit()
-            db.refresh(job_record)
-        
-        # 创建投递记录
-        application = models.Application(
-            user_id=user_id,
-            job_id=job_record.id,
-            status=result.get('status', 'submitted'),
-            applied_at=datetime.now(),
-        )
-        
-        db.add(application)
-        db.commit()
+    def filter_by_location(self, city: str, district: Optional[str] = None) -> List[Job]:
+        """根据地点过滤"""
+        return self.job_repo.filter_by_location(city, district)
+    
+    def filter_by_salary(self, min_salary: int, max_salary: Optional[int] = None) -> List[Job]:
+        """根据薪资过滤"""
+        return self.job_repo.filter_by_salary(min_salary, max_salary)
+    
+    def get_recent_jobs(self, days: int = 7, limit: int = 100) -> List[Job]:
+        """获取最近 N 天的职位"""
+        return self.job_repo.get_recent(days, limit)

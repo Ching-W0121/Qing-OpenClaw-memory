@@ -1,75 +1,66 @@
 """
-routes/jobs.py - 职位路由 (JWT 认证版)
+职位路由 - v1.4 (使用 Schema + Service + Repository)
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Optional, List, Dict
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
 
-from auth.jwt_auth import get_current_user, require_auth, jwt_auth
+from database.db import get_db
+from services.job_service import JobService
+from schemas import JobCreate, JobResponse
 
-router = APIRouter(prefix="/api/jobs", tags=["职位"])
+router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
-class SearchRequest(BaseModel):
-    """搜索请求"""
-    keyword: str
-    city: str = "深圳"
-    page: int = 1
 
-@router.post("/search")
-async def search_jobs(
-    request: SearchRequest,
-    current_user: Dict = Depends(require_auth("read:jobs")),
+@router.post("/", response_model=JobResponse)
+def create_job(job_data: JobCreate, db: Session = Depends(get_db)):
+    """创建职位"""
+    service = JobService(db)
+    return service.create_job(job_data.model_dump())
+
+
+@router.get("/{job_id}", response_model=JobResponse)
+def get_job(job_id: int, db: Session = Depends(get_db)):
+    """获取职位详情"""
+    service = JobService(db)
+    job = service.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+
+@router.get("/search", response_model=List[JobResponse])
+def search_jobs(
+    keyword: Optional[str] = None,
+    city: Optional[str] = None,
+    district: Optional[str] = None,
+    min_salary: Optional[int] = None,
+    max_salary: Optional[int] = None,
+    platform: Optional[str] = None,
+    limit: int = Query(default=50, le=100),
+    db: Session = Depends(get_db)
 ):
-    """
-    搜索职位
-    需要权限：read:jobs
-    """
-    from platform.adapter_factory import AdapterFactory
+    """搜索职位"""
+    service = JobService(db)
     
-    # 使用智联招聘适配器（BOSS 直聘账号封禁中）
-    adapter = AdapterFactory.get_adapter("zhilian")
+    jobs = []
+    if keyword:
+        jobs = service.search_by_title(keyword, limit)
+    elif city:
+        jobs = service.filter_by_location(city, district)
+    elif min_salary:
+        jobs = service.filter_by_salary(min_salary, max_salary)
+    elif platform:
+        jobs = service.job_repo.filter(platform=platform)
+    else:
+        jobs = service.get_recent_jobs(limit=limit)
     
-    jobs = await adapter.search_jobs(
-        keyword=request.keyword,
-        city=request.city,
-        page=request.page,
-    )
-    
-    return {
-        "status": "success",
-        "count": len(jobs),
-        "keyword": request.keyword,
-        "city": request.city,
-        "jobs": jobs,
-        "user": current_user.get("email"),
-    }
+    return jobs
 
-@router.get("/{job_id}")
-async def get_job_detail(
-    job_id: str,
-    current_user: Dict = Depends(require_auth("read:jobs")),
-):
-    """
-    获取职位详情
-    需要权限：read:jobs
-    """
-    # 模拟数据
-    return {
-        "job_id": job_id,
-        "detail": {
-            "title": "品牌策划经理",
-            "company": "某某科技公司",
-            "industry": "互联网",
-            "skills": ["品牌策划", "营销策划", "数据分析"],
-            "tools": ["Office", "Photoshop"],
-            "experience": "3-5 年",
-            "education": "本科",
-            "city": "深圳",
-            "salary_min": 15000,
-            "salary_max": 25000,
-            "description": "负责品牌策划相关工作...",
-            "url": f"https://example.com/job/{job_id}",
-        },
-        "user": current_user.get("email"),
-    }
+
+@router.get("/recent", response_model=List[JobResponse])
+def get_recent_jobs(days: int = 7, limit: int = 100, db: Session = Depends(get_db)):
+    """获取最近 N 天的职位"""
+    service = JobService(db)
+    return service.get_recent_jobs(days, limit)

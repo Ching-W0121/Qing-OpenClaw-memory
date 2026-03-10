@@ -1,5 +1,10 @@
 """
-FastAPI 入口 - v1.3 (JWT 认证版)
+FastAPI 入口 - v1.4 (SQLite + Repository 版)
+
+ChatGPT 老师建议的架构升级:
+- Repository Layer 数据访问层
+- SQLAlchemy 2.0
+- Alembic 数据库迁移
 """
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -9,8 +14,8 @@ from datetime import datetime
 # 创建 FastAPI 应用
 app = FastAPI(
     title="求职 Agent API",
-    description="产品级求职 Agent 系统 - v1.3 (支持 JWT 认证)",
-    version="1.3.0",
+    description="产品级求职 Agent 系统 - v1.4 (SQLite + Repository)",
+    version="1.4.0",
 )
 
 # CORS 配置
@@ -22,28 +27,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup_event():
     """启动时初始化"""
-    print(f"[STARTUP] 求职 Agent API v1.2.0")
+    print("=" * 60)
+    print("🚀 求职 Agent API v1.4.0 启动")
+    print("=" * 60)
     print(f"[INFO] 服务地址：http://127.0.0.1:8000")
     print(f"[INFO] API 文档：http://127.0.0.1:8000/docs")
+    print(f"[INFO] 架构：FastAPI + SQLAlchemy 2.0 + Repository")
+    print(f"[INFO] 数据库：SQLite + Alembic")
     print(f"\n按 Ctrl+C 停止服务\n")
+    
+    # 初始化数据库
+    from database.db import init_db
+    init_db()
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """关闭时清理资源"""
     print("[SHUTDOWN] 服务关闭")
 
+
 @app.get("/")
 async def root():
     """根路径"""
     return {
-        "message": "求职 Agent API v1.3.0 (支持 JWT 认证)",
-        "version": "1.3.0",
+        "message": "求职 Agent API v1.4.0 (SQLite + Repository)",
+        "version": "1.4.0",
         "status": "running",
         "docs": "/docs",
-        "auth_docs": "/auth/docs",
         "endpoints": {
             "users": "/api/users",
             "jobs": "/api/jobs",
@@ -51,7 +66,14 @@ async def root():
             "applications": "/api/applications",
             "health": "/health",
         },
+        "architecture": {
+            "database": "SQLite + Alembic",
+            "orm": "SQLAlchemy 2.0",
+            "pattern": "Repository + Service",
+            "schemas": "Pydantic v2",
+        },
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -64,130 +86,109 @@ async def health_check():
     
     return {
         "status": "healthy",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "timestamp": datetime.now().isoformat(),
         "components": {
             "circuit_breaker": cb.state.value,
             "limiter": "ok",
-            "jwt_auth": "enabled",
+            "database": "connected",
+            "repository": "enabled",
         },
     }
 
-@app.get("/auth/docs")
-async def auth_docs():
-    """JWT 认证文档"""
-    return {
-        "title": "JWT 认证文档",
-        "version": "1.3.0",
-        "auth0_domain": "qing-personal-domain.au.auth0.com",
-        "api_audience": "https://qing-agent-api",
-        "algorithm": "RS256",
-        "jwks_url": "https://qing-personal-domain.au.auth0.com/.well-known/jwks.json",
-        "permissions": {
-            "read:jobs": "读取职位信息",
-            "write:jobs": "写入职位信息/投递",
-            "read:users": "读取用户信息",
-            "write:users": "写入用户信息",
-        },
-        "usage": {
-            "header": "Authorization: Bearer YOUR_ACCESS_TOKEN",
-            "example": "curl -H 'Authorization: Bearer TOKEN' http://127.0.0.1:8000/api/jobs/search",
-        },
-    }
 
-# 注册路由（带 JWT 认证）
-from routes.users import router as users_router
-from routes.jobs import router as jobs_router
-from routes.matches import router as matches_router
-from routes.applications import router as applications_router
+# 注册路由
+from routes import users, jobs, matches, applications
 
-# 所有 API 路由现在都受 JWT 保护
-app.include_router(users_router)
-app.include_router(jobs_router)
-app.include_router(matches_router)
-app.include_router(applications_router)
+app.include_router(users.router)
+app.include_router(jobs.router)
+app.include_router(matches.router)
+app.include_router(applications.router)
 
-# 测试端点
-@app.get("/api/test/match")
-async def test_match():
-    """测试匹配功能"""
-    from tools.matcher import MatchingEngine
-    
-    engine = MatchingEngine()
-    
-    user = {
-        "industry": "广告",
-        "skills": ["品牌策划", "文案写作"],
-        "tools": ["Photoshop"],
-        "experience_years": 3,
-        "education": "本科",
-        "expected_city": "深圳",
-        "expected_salary_min": 10000,
-        "expected_salary_max": 15000,
-    }
-    
-    job = {
-        "industry": "广告",
-        "skills": ["品牌策划", "营销策划"],
-        "tools": ["Photoshop"],
-        "experience": "3-5 年",
-        "education": "本科",
-        "city": "深圳",
-        "salary_min": 12000,
-        "salary_max": 18000,
-    }
-    
-    result = engine.calculate_match(user, job)
-    
-    return {
-        "match_score": result["total"],
-        "match_level": engine.get_match_level(result["total"]),
-        "details": result["details"],
-    }
 
-@app.get("/api/test/industry")
-async def test_industry():
-    """测试行业匹配"""
-    from tools.industry_matcher import IndustryMatcher
+# 测试数据初始化
+@app.post("/init/test-data")
+async def init_test_data():
+    """初始化测试数据"""
+    from database.db import SessionLocal
+    from repositories.user_repo import UserRepository
+    from repositories.job_repo import JobRepository
+    from repositories.match_repo import MatchRepository
+    from repositories.application_repo import ApplicationRepository
     
-    matcher = IndustryMatcher()
-    
-    test_cases = [
-        ("广告", "广告"),
-        ("广告", "品牌咨询"),
-        ("品牌咨询", "营销策划"),
-        ("广告", "电商"),
-        ("广告", "金融"),
-    ]
-    
-    results = []
-    for user_ind, job_ind in test_cases:
-        score = matcher.match(user_ind, job_ind)
-        results.append({
-            "user": user_ind,
-            "job": job_ind,
-            "score": score,
+    db = SessionLocal()
+    try:
+        user_repo = UserRepository(db)
+        job_repo = JobRepository(db)
+        match_repo = MatchRepository(db)
+        app_repo = ApplicationRepository(db)
+        
+        # 创建测试用户
+        test_user = user_repo.create({
+            "name": "测试用户",
+            "education": "本科",
+            "major": "计算机科学与技术",
+            "experience_years": 3,
+            "skills": ["Python", "FastAPI", "SQLAlchemy"],
+            "tools": ["Git", "Docker"],
+            "industry": "互联网",
+            "expected_city": "深圳",
+            "expected_salary_min": 10000,
+            "expected_salary_max": 15000,
         })
-    
-    return {"results": results}
+        
+        # 创建测试职位
+        test_job = job_repo.create({
+            "platform": "zhilian",
+            "source_platform_id": "test_001",
+            "title": "Python 开发工程师",
+            "company": "某某科技公司",
+            "city": "深圳",
+            "district": "南山区",
+            "salary_min": 12000,
+            "salary_max": 18000,
+            "experience": "3-5 年",
+            "education": "本科",
+            "industry": "互联网",
+            "skills": ["Python", "FastAPI"],
+            "url": "https://example.com/job/001",
+        })
+        
+        # 创建测试匹配
+        test_match = match_repo.create_match(
+            user_id=test_user.id,
+            job_id=test_job.id,
+            match_score=0.85,
+            match_vector={
+                "industry": 0.9,
+                "skill": 0.8,
+                "experience": 0.8,
+                "salary": 0.9,
+                "location": 1.0,
+                "education": 1.0,
+                "tools": 0.7,
+            },
+            match_details={"reason": "技能和经验匹配度高"}
+        )
+        
+        # 创建测试投递
+        test_app = app_repo.create_application(
+            user_id=test_user.id,
+            job_id=test_job.id,
+            status="pending"
+        )
+        
+        return {
+            "message": "测试数据初始化完成",
+            "user_id": test_user.id,
+            "job_id": test_job.id,
+            "match_id": test_match.id,
+            "application_id": test_app.id,
+        }
+    finally:
+        db.close()
 
-@app.get("/api/test/protection")
-async def test_protection():
-    """测试防封禁组件"""
-    from tools.circuit_breaker import CircuitBreaker
-    from tools.operation_limiter import OperationLimiter
-    from tools.session_manager import SessionManager
-    
-    cb = CircuitBreaker()
-    limiter = OperationLimiter()
-    session = SessionManager()
-    
-    return {
-        "circuit_breaker": cb.get_status(),
-        "limiter": limiter.get_status(),
-        "session_manager": session.get_session_info(),
-    }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,80 +1,79 @@
 """
-routes/applications.py - 投递路由 (JWT 认证版)
+投递路由 - v1.4 (使用 Schema + Service + Repository)
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Optional, List, Dict
-from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List, Optional
 
-from auth.jwt_auth import get_current_user, require_auth
+from database.db import get_db
+from services.application_service import ApplicationService
+from schemas import ApplicationCreate, ApplicationUpdate, ApplicationResponse
 
-router = APIRouter(prefix="/api/applications", tags=["投递"])
+router = APIRouter(prefix="/api/applications", tags=["applications"])
 
-class SubmitApplicationRequest(BaseModel):
-    """投递请求"""
-    job_id: str
-    user_id: str
-    resume_url: Optional[str] = None
 
-# 内存存储（实际应使用数据库）
-_applications_db = []
+@router.post("/submit", response_model=ApplicationResponse)
+def submit_application(app_data: ApplicationCreate, db: Session = Depends(get_db)):
+    """提交投递"""
+    service = ApplicationService(db)
+    return service.create_application(
+        user_id=app_data.user_id,
+        job_id=app_data.job_id,
+        status=app_data.status
+    )
 
-@router.post("/submit")
-async def submit_application(
-    request: SubmitApplicationRequest,
-    current_user: Dict = Depends(require_auth("write:jobs")),
+
+@router.get("/{application_id}", response_model=ApplicationResponse)
+def get_application(application_id: int, db: Session = Depends(get_db)):
+    """获取投递记录"""
+    service = ApplicationService(db)
+    app = service.get_application(application_id)
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return app
+
+
+@router.get("/user/{user_id}", response_model=List[ApplicationResponse])
+def get_user_applications(user_id: int, db: Session = Depends(get_db)):
+    """获取用户的投递记录"""
+    service = ApplicationService(db)
+    return service.get_user_applications(user_id)
+
+
+@router.put("/{application_id}", response_model=ApplicationResponse)
+def update_application(
+    application_id: int,
+    app_data: ApplicationUpdate,
+    db: Session = Depends(get_db)
 ):
-    """
-    提交投递
-    需要权限：write:jobs
-    """
-    from platform.adapter_factory import AdapterFactory
+    """更新投递状态"""
+    service = ApplicationService(db)
     
-    # 获取职位详情（模拟）
-    job_url = f"https://example.com/job/{request.job_id}"
+    update_data = app_data.model_dump(exclude_unset=True)
     
-    # 使用适配器投递
-    adapter = AdapterFactory.get_adapter("zhilian")
-    result = await adapter.apply(job_url, request.resume_url)
+    # 单独处理备注
+    notes = update_data.pop('notes', None)
+    if notes:
+        service.add_note(application_id, notes)
     
-    # 记录投递
-    application = {
-        "id": f"app_{len(_applications_db) + 1}",
-        "job_id": request.job_id,
-        "user_id": request.user_id,
-        "job_url": job_url,
-        "resume_url": request.resume_url,
-        "status": result.get("status", "unknown"),
-        "applied_at": datetime.now().isoformat(),
-        "result": result,
-    }
-    _applications_db.append(application)
+    # 更新状态
+    if update_data:
+        app = service.update_status(
+            application_id,
+            update_data.get('status', 'pending'),
+            update_data.get('platform_status')
+        )
+    else:
+        app = service.get_application(application_id)
     
-    return {
-        "status": "success" if result.get("status") == "submitted" else "failed",
-        "application_id": application["id"],
-        "job_id": request.job_id,
-        "user_id": request.user_id,
-        "result": result,
-        "auth_user": current_user.get("email"),
-    }
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return app
 
-@router.get("/{user_id}")
-async def get_applications(
-    user_id: str,
-    current_user: Dict = Depends(require_auth("read:users")),
-):
-    """
-    获取投递记录
-    需要权限：read:users
-    """
-    user_apps = [app for app in _applications_db if app["user_id"] == user_id]
-    
-    return {
-        "status": "success",
-        "user_id": user_id,
-        "count": len(user_apps),
-        "applications": user_apps,
-        "auth_user": current_user.get("email"),
-    }
+
+@router.get("/user/{user_id}/status/{status}", response_model=List[ApplicationResponse])
+def get_by_status(user_id: int, status: str, db: Session = Depends(get_db)):
+    """根据状态获取投递"""
+    service = ApplicationService(db)
+    return service.get_by_status(user_id, status)
