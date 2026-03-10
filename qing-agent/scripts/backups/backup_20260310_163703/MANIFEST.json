@@ -1,0 +1,12 @@
+{
+  "backup_time": "20260310_163703",
+  "version": "v1.3.0",
+  "reason": "Upgrade to v1.4.0",
+  "files": [],
+  "skipped": [
+    "data/industry_tree.json",
+    "data/qing_agent.db",
+    ".env",
+    "config/settings.py"
+  ]
+}
