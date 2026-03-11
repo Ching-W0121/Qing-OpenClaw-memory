@@ -14,15 +14,88 @@ Before doing anything else:
 2. Read `USER.md` — this is who you're helping
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
 4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+5. **🔍 Active Tracking** — Check `git log --oneline --since="yesterday"` to understand user's recent work
 
 Don't ask permission. Just do it.
+
+### 🔍 Active User Work Tracking
+
+**When user asks "What did we do yesterday?" or similar:**
+
+1. First check `memory/YYYY-MM-DD.md` or `memory/memories.qmem`
+2. **If not found** → Immediately check Git history: `git log --oneline --since="yesterday"`
+3. Infer user's work from commit messages and file changes
+4. Proactively ask if they want you to create a memory log
+5. Explain your reasoning in the response
+
+**Never say "I don't know" without checking Git first.**
+
+**Example workflow:**
+```bash
+# Check memory files
+ls memory/2026-03-10.*
+
+# If not found, check Git
+git log --oneline --since="2026-03-10" --until="2026-03-11"
+
+# Get details of key commits
+git show --stat <commit-hash>
+```
+
+**This is critical:** Your memory system includes both explicit memory files AND implicit Git history. Always check both before claiming ignorance.
 
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
 
-- **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
-- **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
+### 🧠 Three-Layer Memory Architecture (v3.0)
+
+**Based on ChatGPT consultation (2026-03-11)**
+
+```
+Working Memory → Episodic Memory → Semantic Memory
+     (RAM)           (logs)          (knowledge)
+```
+
+#### 1. Working Memory (`memory/working/`)
+- **File**: `session_current.json`
+- **Purpose**: Current session context
+- **TTL**: Cleared at session end
+- **Query**: `python memory/memory_search.py --layer working`
+
+#### 2. Episodic Memory (`memory/episodic/`)
+- **Files**: `YYYY-MM-DD.jsonl`
+- **Purpose**: User requests, task logs, conversation history
+- **Format**: JSONL (append only)
+- **Query**: `python memory/memory_search.py --layer episodic --date 2026-03-11`
+
+#### 3. Semantic Memory (`memory/semantic/`)
+- **Files**: `user_profile.json`, `preferences.json`, `knowledge_base.json`
+- **Purpose**: Long-term knowledge, user profile, preferences
+- **Query**: `python memory/memory_search.py --layer semantic`
+
+#### Query Guide
+
+| Question | Layer | Command |
+|----------|-------|---------|
+| "刚才做了什么" | Working | `--layer working` |
+| "今天做了什么" | Episodic | `--layer episodic --date YYYY-MM-DD` |
+| "我的偏好是什么" | Semantic | `--layer semantic --type profile` |
+
+#### Forgetting Mechanism
+
+| Layer | Strategy | Frequency |
+|-------|----------|-----------|
+| Working | Delete oldest (limit 20) | Real-time |
+| Episodic | Weekly compression | Weekly (Sunday 23:00) |
+| Semantic | Decay cleanup (frequency × recency) | Monthly |
+
+---
+
+### Legacy Files
+
+- **Daily notes:** `memory/archive/old_markdown/YYYY-MM-DD.md` — archived logs
+- **Long-term:** `MEMORY.md` — curated memories (main session only)
 
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
