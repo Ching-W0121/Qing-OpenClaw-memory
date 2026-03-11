@@ -1,0 +1,12 @@
+{
+  "session_id": "agent:main:main-20260311-142100",
+  "started_at": "2026-03-11T14:21:00+08:00",
+  "current_goal": "重构三层记忆系统",
+  "recent_messages": [
+    {"role": "user", "content": "重新构建", "timestamp": "2026-03-11T14:54:00"},
+    {"role": "assistant", "content": "明白！立即按 ChatGPT 的三层架构重构记忆系统", "timestamp": "2026-03-11T14:54:30"}
+  ],
+  "active_entities": ["OpenClaw", "记忆系统", "三层架构", "ChatGPT 咨询"],
+  "scratchpad": "正在执行重构：创建 working/episodic/semantic 目录，迁移现有数据",
+  "last_updated": "2026-03-11T14:55:00+08:00"
+}

@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "version": "3.0",
+    "created_at": "2026-03-11T14:55:00+08:00",
+    "description": "领域知识库 - 语义记忆层"
+  },
+  "memory_system": {
+    "architecture": "三层模型",
+    "layers": {
+      "working": {
+        "purpose": "当前会话上下文",
+        "storage": "memory/working/session_current.json",
+        "ttl": "session_end",
+        "capacity": "last_20_messages"
+      },
+      "episodic": {
+        "purpose": "用户请求历史、任务执行日志",
+        "storage": "memory/episodic/YYYY-MM-DD.jsonl",
+        "format": "JSONL (append only)",
+        "compression": "weekly_summary"
+      },
+      "semantic": {
+        "purpose": "用户画像、偏好、领域知识",
+        "storage": "memory/semantic/*.json",
+        "format": "structured JSON",
+        "decay": "monthly (frequency × recency)"
+      }
+    },
+    "flow": {
+      "working_to_episodic": "session_end (summarize)",
+      "episodic_to_semantic": "daily_consolidation (extract_facts)"
+    },
+    "query_strategy": {
+      "recent_question": "working",
+      "history_question": "episodic (time_range)",
+      "profile_question": "semantic",
+      "similarity_question": "vector_search"
+    },
+    "forgetting_mechanism": {
+      "working": "delete_oldest_when_full",
+      "episodic": "weekly_compression",
+      "semantic": "monthly_decay_cleanup"
+    },
+    "source": "ChatGPT consultation 2026-03-11"
+  },
+  "openclaw": {
+    "agent_name": "青 (Qing)",
+    "workspace": "C:\\Users\\TR\\.openclaw\\workspace",
+    "memory_sync": {
+      "schedule": "hourly (0 * * * *)",
+      "target": "GitHub: Qing-OpenClaw-memory",
+      "content": ["memory/", ".learnings/"]
+    },
+    "heartbeat": {
+      "schedule": "every_30_minutes",
+      "tasks": ["email_check", "calendar_check", "weather_check"]
+    }
+  },
+  "job_search": {
+    "platforms": {
+      "zhilian": {
+        "status": "available",
+        "web_access": true,
+        "recommended": true
+      },
+      "boss": {
+        "status": "limited",
+        "web_access": false,
+        "requires_app": true,
+        "recommended": false
+      }
+    },
+    "search_keywords": ["品牌策划", "品牌宣传", "视觉设计", "品牌设计"],
+    "match_algorithm": {
+      "industry_weight": 0.30,
+      "skills_weight": 0.25,
+      "experience_weight": 0.20,
+      "salary_weight": 0.10,
+      "location_weight": 0.10,
+      "education_weight": 0.05,
+      "threshold": 0.70
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "version": "3.0",
+  "updated_at": "2026-03-11T14:55:00+08:00",
+  "description": "三层记忆系统索引文件",
+  "structure": {
+    "working": {
+      "path": "memory/working/",
+      "files": ["session_current.json"],
+      "purpose": "当前会话上下文",
+      "ttl": "session_end"
+    },
+    "episodic": {
+      "path": "memory/episodic/",
+      "format": "YYYY-MM-DD.jsonl",
+      "purpose": "用户请求历史",
+      "entries_count": 13,
+      "date_range": "2026-03-11"
+    },
+    "semantic": {
+      "path": "memory/semantic/",
+      "files": ["user_profile.json", "preferences.json", "knowledge_base.json"],
+      "purpose": "长期知识"
+    },
+    "summaries": {
+      "path": "memory/summaries/",
+      "format": "YYYY-Www.json",
+      "purpose": "周总结归档"
+    }
+  },
+  "query_guide": {
+    "刚才/现在": "working/session_current.json",
+    "今天/本周": "episodic/YYYY-MM-DD.jsonl (time_range)",
+    "用户偏好": "semantic/preferences.json",
+    "用户画像": "semantic/user_profile.json",
+    "领域知识": "semantic/knowledge_base.json",
+    "历史总结": "summaries/YYYY-Www.json"
+  },
+  "sync_status": {
+    "github": "hourly",
+    "last_sync": "2026-03-11T14:03:00",
+    "next_sync": "2026-03-11T15:00:00"
+  }
+}
