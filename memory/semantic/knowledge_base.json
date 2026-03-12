@@ -61,24 +61,55 @@
       "zhilian": {
         "status": "available",
         "web_access": true,
-        "recommended": true
+        "recommended": true,
+        "primary_source": true,
+        "coverage": "60%"
       },
       "boss": {
-        "status": "limited",
+        "status": "unavailable",
         "web_access": false,
         "requires_app": true,
-        "recommended": false
+        "recommended": false,
+        "reason": "strict anti-automation"
+      },
+      "job51": {
+        "status": "available",
+        "web_access": true,
+        "recommended": true,
+        "adapter": "qing_platform/job51_adapter.py"
+      },
+      "lagou": {
+        "status": "available",
+        "web_access": true,
+        "recommended": true,
+        "adapter": "qing_platform/lagou_adapter.py"
       }
     },
     "search_keywords": ["品牌策划", "品牌宣传", "视觉设计", "品牌设计"],
-    "match_algorithm": {
-      "industry_weight": 0.30,
-      "skills_weight": 0.25,
-      "experience_weight": 0.20,
-      "salary_weight": 0.10,
-      "location_weight": 0.10,
-      "education_weight": 0.05,
+    "v1_4_scoring": {
+      "match_weight": 0.40,
+      "salary_weight": 0.25,
+      "city_weight": 0.15,
+      "keyword_weight": 0.10,
+      "industry_weight": 0.10,
       "threshold": 0.70
+    },
+    "deduplication": {
+      "method": "hash",
+      "key": "title + company + city"
+    },
+    "push_schedule": {
+      "time": "09:00",
+      "timezone": "Asia/Shanghai",
+      "top_n": 10
+    },
+    "protection": {
+      "max_retry": 3,
+      "timeout_seconds": 60,
+      "circuit_breaker": {
+        "threshold": 3,
+        "cooldown_minutes": 30
+      }
     }
   }
 }

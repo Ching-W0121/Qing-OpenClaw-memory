@@ -26,12 +26,15 @@
   "projects": {
     "qing_agent": {
       "name": "求职 Agent 系统",
-      "status": "in_progress",
-      "progress": 0.75,
+      "status": "v1.4_completed",
+      "progress": 1.0,
       "version": "v1.4",
-      "last_updated": "2026-03-10",
-      "description": "自动化求职系统，实现岗位搜索、匹配、投递",
-      "tech_stack": ["Python", "FastAPI", "SQLite", "JWT", "Alembic"]
+      "last_updated": "2026-03-12",
+      "description": "自动化求职系统，实现岗位搜索、匹配、评分、推送",
+      "tech_stack": ["Python", "SQLAlchemy", "SQLite", "Repository Pattern", "Browser Automation"],
+      "core_features": ["职位去重", "5 维评分", "每日推送", "多平台适配器"],
+      "platforms": {"zhilian": "available", "boss": "unavailable_web", "job51": "available", "lagou": "available"},
+      "next_phase": "v2.0_architecture_upgrade"
     },
     "openviking": {
       "name": "openViking 向量数据库",
