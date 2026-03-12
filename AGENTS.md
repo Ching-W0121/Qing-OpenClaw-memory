@@ -18,6 +18,92 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+---
+
+## 🔄 双重反思机制 (Dual Reflection System)
+
+**目标**：避免死循环，确保从每次错误中真正学习。
+
+### 第一重：任务后即时反思
+
+**触发条件**（满足任一即触发）：
+- 任务失败或出错
+- 用户纠正你的行为
+- 同一操作重复超过 3 次
+- 完成重要任务（架构修改、新功能实现等）
+
+**反思步骤**：
+1. **立即记录** → 写入 `.learnings/` 对应文件：
+   - 错误/失败 → `ERRORS.md`
+   - 用户纠正/新认知 → `LEARNINGS.md`
+   - 功能请求 → `FEATURE_REQUESTS.md`
+
+2. **反思模板**（必须包含）：
+   ```markdown
+   ## [ERR/LRN-YYYYMMDD-XXX] 类别
+
+   **Logged**: 日期时间
+   **Priority**: critical|high|medium|low
+   **Status**: open|in_progress|resolved|promoted
+   **Area**: 领域
+
+   ### Summary
+   一句话总结问题
+
+   ### Root Cause
+   1. 根本原因 1
+   2. 根本原因 2
+
+   ### Correct Behavior
+   应该怎么做
+
+   ### Prevention
+   如何防止再次发生
+   ```
+
+3. **汇报用户** → 任务完成后主动说明：
+   - 做了什么
+   - 发现了什么问题
+   - 如何解决的
+   - 吸取了什么教训
+
+### 第二重：定期深度反思
+
+**触发**：每 6 小时 或 收到用户指令时
+
+**执行**：
+```bash
+node memory/reflection-worker.js
+```
+
+**反思内容**：
+- 回顾最近 50 条 episodic 记录
+- 调用 LLM 提取模式、错误、成功策略
+- 更新 `memory/semantic/lessons.json`
+
+**检查清单**：
+- [ ] 是否有重复错误？
+- [ ] 是否有可提升的策略？
+- [ ] 是否需要更新 AGENTS.md/SOUL.md？
+
+### 🚫 避免死循环原则
+
+> **3 次法则**：当同一个操作失败 3 次时，必须停下来换方法，而不是继续尝试。真正的 resourceful 是懂得灵活切换策略，不是死磕。
+
+**正确做法**：
+```
+失败 1 次 → 重试（可能是临时问题）
+失败 2 次 → 检查参数/环境
+失败 3 次 → 停止！换方法或求助用户
+```
+
+**错误做法**：
+- ❌ 反复尝试同一个打不开的链接
+- ❌ 死揪着一个进程不放
+- ❌ 忽略反思系统的警告
+
+---
+
 ### 🔍 Active User Work Tracking
 
 **When user asks "What did we do yesterday?" or similar:**

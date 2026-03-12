@@ -3,10 +3,12 @@ BOSS 直聘适配器 - 完整版
 接入 OpenClaw browser 工具
 """
 
-from platform.base_adapter import BaseAdapter
+from qing_platform.base_adapter import BaseAdapter
 import asyncio
 import re
 import json
+import time
+from datetime import datetime, timedelta
 
 class BossAdapter(BaseAdapter):
     """BOSS 直聘适配器"""
@@ -16,10 +18,46 @@ class BossAdapter(BaseAdapter):
         self.base_url = "https://www.zhipin.com"
         self.city_code = "101280600"  # 深圳
         self.exclude_districts = ["宝安区"]  # 排除区域
+        
+        # === 防死循环保护机制 ===
+        self.max_retry = 3  # 最大重试次数
+        self.timeout_seconds = 60  # 超时时间（秒）
+        self.circuit_breaker_threshold = 3  # 熔断阈值（连续失败次数）
+        self.circuit_breaker_cooldown = 1800  # 熔断冷却时间（秒）= 30 分钟
+        self._failure_count = 0  # 连续失败计数
+        self._circuit_open_until = None  # 熔断打开直到何时
+        self._last_success_time = None  # 上次成功时间
+    
+    def _is_circuit_open(self):
+        """检查熔断器是否打开"""
+        if self._circuit_open_until is None:
+            return False
+        if datetime.now() < self._circuit_open_until:
+            return True
+        print("[CIRCUIT BREAKER] 冷却时间已过，关闭熔断器")
+        self._circuit_open_until = None
+        self._failure_count = 0
+        return False
+    
+    def _on_success(self):
+        """成功时调用"""
+        self._failure_count = 0
+        self._last_success_time = datetime.now()
+    
+    def _on_failure(self):
+        """失败时调用"""
+        self._failure_count += 1
+        if self._failure_count >= self.circuit_breaker_threshold:
+            self._open_circuit()
+    
+    def _open_circuit(self):
+        """打开熔断器"""
+        self._circuit_open_until = datetime.now() + timedelta(seconds=self.circuit_breaker_cooldown)
+        print(f"[CIRCUIT BREAKER] 熔断器已打开，冷却 {self.circuit_breaker_cooldown} 秒")
     
     async def search_jobs(self, keyword, city=None, page=1):
         """
-        搜索 BOSS 直聘职位
+        搜索 BOSS 直聘职位（带保护机制）
         
         Args:
             keyword: 搜索关键词
@@ -29,21 +67,72 @@ class BossAdapter(BaseAdapter):
         Returns:
             list: 职位列表
         """
+        # === 保护 1: 熔断器检查 ===
+        if self._is_circuit_open():
+            print(f"[CIRCUIT BREAKER] 熔断器已打开，拒绝请求")
+            return self._mock_search_results(keyword, page)
+        
         city_code = self._get_city_code(city) if city else self.city_code
         url = f"{self.base_url}/web/geek/job?city={city_code}&query={keyword}&page={page}"
         
-        print(f"🔍 搜索 BOSS 直聘：{keyword} (城市：{city}, 页码：{page})")
+        print(f"[SEARCH] BOSS 直聘：{keyword} (城市：{city}, 页码：{page})")
         print(f"   URL: {url}")
         
+        # === 保护 2: 重试机制 ===
+        last_error = None
+        for attempt in range(1, self.max_retry + 1):
+            try:
+                # === 保护 3: 超时检查 ===
+                start_time = time.time()
+                
+                result = await self._do_search_with_timeout(url, keyword, start_time)
+                
+                # 成功：重置失败计数
+                self._on_success()
+                
+                # 过滤排除区域
+                result = [j for j in result if j.get('district') not in self.exclude_districts]
+                print(f"   找到 {len(result)} 个职位（排除宝安区后）")
+                
+                return result
+                
+            except asyncio.TimeoutError:
+                last_error = f"超时（尝试 {attempt}/{self.max_retry}）"
+                print(f"[TIMEOUT] {last_error}")
+                self._on_failure()
+                
+            except Exception as e:
+                last_error = f"错误：{e}（尝试 {attempt}/{self.max_retry}）"
+                print(f"[ERROR] {last_error}")
+                self._on_failure()
+                
+                # 熔断器触发：提前退出
+                if self._failure_count >= self.circuit_breaker_threshold:
+                    print(f"[CIRCUIT BREAKER] 连续失败 {self._failure_count} 次，触发熔断")
+                    return self._mock_search_results(keyword, page)
+        
+        # 所有重试失败：返回降级数据
+        print(f"[FALLBACK] 所有重试失败，使用模拟数据。最后错误：{last_error}")
+        return self._mock_search_results(keyword, page)
+    
+    async def _do_search_with_timeout(self, url, keyword, start_time):
+        """带超时检查的搜索执行"""
         try:
-            # 使用 OpenClaw browser 工具
             from openclaw import browser
+            
+            # 检查是否已超时
+            elapsed = time.time() - start_time
+            if elapsed > self.timeout_seconds:
+                raise asyncio.TimeoutError(f"搜索超时 ({elapsed:.1f}s > {self.timeout_seconds}s)")
             
             # 打开页面
             await browser.open(url)
             
-            # 等待页面加载（智能等待）
-            await self._smart_wait(5)
+            # 等待页面加载（带超时检查）
+            await asyncio.sleep(3)
+            elapsed = time.time() - start_time
+            if elapsed > self.timeout_seconds:
+                raise asyncio.TimeoutError(f"等待超时 ({elapsed:.1f}s > {self.timeout_seconds}s)")
             
             # 获取快照
             snapshot = await browser.snapshot(refs="aria")
@@ -51,17 +140,16 @@ class BossAdapter(BaseAdapter):
             # 解析结果
             jobs = self.parse_search_results(snapshot, keyword)
             
-            # 过滤排除区域
-            jobs = [j for j in jobs if j.get('district') not in self.exclude_districts]
-            
-            print(f"   找到 {len(jobs)} 个职位（排除宝安区后）")
+            print(f"   解析到 {len(jobs)} 个职位")
             
             return jobs
             
         except Exception as e:
-            print(f"❌ 搜索失败：{e}")
-            # 降级：返回模拟数据
-            return self._mock_search_results(keyword, page)
+            # 检查超时
+            elapsed = time.time() - start_time
+            if elapsed > self.timeout_seconds:
+                raise asyncio.TimeoutError(f"搜索超时 ({elapsed:.1f}s > {self.timeout_seconds}s)")
+            raise
     
     def parse_search_results(self, snapshot, keyword):
         """

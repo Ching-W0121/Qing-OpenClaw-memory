@@ -9,7 +9,7 @@ import os
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from platform.zhilian_adapter import ZhilianAdapter
+from qing_platform.zhilian_adapter import ZhilianAdapter
 from tools.jd_parser import JDParser
 from tools.matcher import MatchingEngine
 from tools.recommender import Recommender
