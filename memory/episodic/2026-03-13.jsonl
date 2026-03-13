@@ -65,3 +65,4 @@
 {"timestamp":"2026-03-13T10:53:51.814Z","type":"user_message","id":"EP-1773399231814-qencba","content":"使用方案A","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
 {"timestamp":"2026-03-13T10:59:23.911Z","type":"user_message","id":"EP-1773399563911-klzyll","content":"把所有未配置的配置上，需要什么配置跟我说","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
 {"timestamp":"2026-03-13T11:02:54.729Z","type":"user_message","id":"EP-1773399774729-qcs9s2","content":"https://github.com/liugedapiqiu-dev/vectorbrain，你用chrome浏览器打开这个网站，然后阅读它的使用文档，一步一步完成它","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
+{"timestamp":"2026-03-13T13:08:10.067Z","type":"user_message","id":"EP-1773407290067-j80ov3","content":"你根据官方文档的步骤一步一步操作就行，对于embedding模型，我们换个模型，我稍后会给你单独配置，你先把其他的都完成","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
