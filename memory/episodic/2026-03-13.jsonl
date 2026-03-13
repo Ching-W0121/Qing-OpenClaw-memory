@@ -1,1 +1,2 @@
 {"timestamp":"2026-03-13T00:14:06.125Z","type":"user_message","id":"EP-1773360846126-yl34l1","content":"你尝试一下打开飞书开放后台，在事件回调或者权限里面找找有没有相关发送图片的权限未设置","session_id":"agent:main:feishu:direct:ou_c9dbf0df4fc7459eafa8694efc681ce4","channel":"feishu","metadata":{"source":"hook"}}
+{"timestamp":"2026-03-13T02:00:00.509Z","type":"user_message","id":"EP-1773367200510-s5voal","content":"我们昨天晚上做了什么","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
