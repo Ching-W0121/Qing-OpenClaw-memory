@@ -20,11 +20,13 @@ Don't ask permission. Just do it.
 
 ---
 
-## 🔄 双重反思机制 (Dual Reflection System)
+## 🔄 双重反思机制 (Dual Reflection System) v3.0
+
+**整合 self-improvement v3.0.1 + VectorBrain 主动记忆模块**
 
 **目标**：避免死循环，确保从每次错误中真正学习。
 
-### 第一重：任务后即时反思
+### 第一重：任务后即时反思（手动）
 
 **触发条件**（满足任一即触发）：
 - 任务失败或出错
@@ -38,27 +40,30 @@ Don't ask permission. Just do it.
    - 用户纠正/新认知 → `LEARNINGS.md`
    - 功能请求 → `FEATURE_REQUESTS.md`
 
-2. **反思模板**（必须包含）：
+2. **反思模板**（self-improvement v3.0.1 格式）：
    ```markdown
-   ## [ERR/LRN-YYYYMMDD-XXX] 类别
+   ## [ERR/LRN-YYYYMMDD-XXX] category
 
-   **Logged**: 日期时间
+   **Logged**: ISO-8601 timestamp
    **Priority**: critical|high|medium|low
-   **Status**: open|in_progress|resolved|promoted
-   **Area**: 领域
+   **Status**: pending|in_progress|resolved|promoted
+   **Area**: frontend|backend|infra|tests|docs|config
 
    ### Summary
    一句话总结问题
 
-   ### Root Cause
-   1. 根本原因 1
-   2. 根本原因 2
+   ### Details
+   完整上下文：发生了什么、什么是错的、什么是正确的
 
-   ### Correct Behavior
-   应该怎么做
+   ### Suggested Action
+   具体的修复或改进建议
 
-   ### Prevention
-   如何防止再次发生
+   ### Metadata
+   - Source: conversation|error|user_feedback|reflection
+   - Related Files: path/to/file.ext
+   - Tags: tag1, tag2
+   - See Also: LRN-20250110-001 (如果与现有条目相关)
+   - Pattern-Key: simplify.dead_code|harden.input_validation (可选，用于追踪重复模式)
    ```
 
 3. **汇报用户** → 任务完成后主动说明：
@@ -67,7 +72,7 @@ Don't ask permission. Just do it.
    - 如何解决的
    - 吸取了什么教训
 
-### 第二重：定期深度反思
+### 第二重：定期深度反思（自动）
 
 **触发**：每 6 小时 或 收到用户指令时
 
@@ -80,11 +85,21 @@ node memory/reflection-worker.js
 - 回顾最近 50 条 episodic 记录
 - 调用 LLM 提取模式、错误、成功策略
 - 更新 `memory/semantic/lessons.json`
+- **自动记录到** `.learnings/LEARNINGS.md`（self-improvement v3.0.1 格式）
+- **自动晋升** 重复模式到 TOOLS.md/AGENTS.md/SOUL.md
+
+**输出文件**：
+| 文件 | 内容 |
+|------|------|
+| `memory/semantic/lessons.json` | 结构化教训、策略、错误、模式 |
+| `.learnings/LEARNINGS.md` | 详细学习日志（v3.0.1 格式） |
+| `.learnings/ERRORS.md` | 错误日志 |
 
 **检查清单**：
 - [ ] 是否有重复错误？
 - [ ] 是否有可提升的策略？
 - [ ] 是否需要更新 AGENTS.md/SOUL.md？
+- [ ] 是否有模式需要晋升到 workspace 文件？
 
 ### 🚫 避免死循环原则
 

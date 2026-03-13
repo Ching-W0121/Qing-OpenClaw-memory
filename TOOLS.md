@@ -60,6 +60,85 @@ Things like:
 
 ---
 
+## 📸 飞书发图片（重要！）
+
+**问题**: OpenClaw 的 `message` 工具在飞书上发图有 bug，飞书收到的是文件路径文本，不是真正的图片。
+
+**正确方法**: 用 `exec` 工具执行 curl 调用飞书 API，分三步：
+
+### Step 1: 获取 tenant_access_token
+
+```powershell
+# 从 openclaw.json 读取 appSecret
+$CONFIG = Get-Content "$env:APPDATA\openclaw\openclaw.json" | ConvertFrom-Json
+$APP_ID = $CONFIG.channels.feishu.appId
+$APP_SECRET = $CONFIG.channels.feishu.appSecret
+
+# 获取 token
+$TOKEN_RESPONSE = Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal' -Method Post -ContentType 'application/json' -Body (@{app_id=$APP_ID;app_secret=$APP_SECRET} | ConvertTo-Json)
+$TOKEN = $TOKEN_RESPONSE.tenant_access_token
+```
+
+### Step 2: 上传图片获取 image_key
+
+```powershell
+# 上传图片（支持 JPEG, PNG, WEBP, GIF, TIFF, BMP, ICO）
+$IMAGE_PATH = "C:/path/to/image.png"
+$IMAGE_RESPONSE = Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/im/v1/images' -Method Post -Headers @{Authorization="Bearer $TOKEN"} -Form @{image_type="message";image=(Get-Item $IMAGE_PATH)}
+$IMAGE_KEY = $IMAGE_RESPONSE.data.image_key
+```
+
+### Step 3: 发送图片消息
+
+```powershell
+# 发送图片消息
+$RECEIVE_ID = "ou_xxxxxxxx"  # 收信人 open_id
+$CONTENT = (@{image_key=$IMAGE_KEY} | ConvertTo-Json -Compress)
+Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id' -Method Post -Headers @{Authorization="Bearer $TOKEN";'Content-Type'='application/json'} -Body (@{receive_id=$RECEIVE_ID;msg_type="image";content=$CONTENT} | ConvertTo-Json)
+```
+
+### 关键信息
+
+| 配置项 | 值 |
+|--------|-----|
+| App ID | `cli_a93ba86cdfba5bcc` |
+| 用户 open_id | 待获取（在飞书开发者后台查看） |
+| 支持格式 | JPEG, PNG, WEBP, GIF, TIFF, BMP, ICO |
+| 最大文件大小 | 10MB |
+
+### 完整示例（PowerShell 脚本）
+
+```powershell
+# 飞书发图完整脚本
+param(
+    [string]$ImagePath,
+    [string]$ReceiveId
+)
+
+# 读取配置
+$CONFIG = Get-Content "$env:APPDATA\openclaw\openclaw.json" | ConvertFrom-Json
+$APP_ID = $CONFIG.channels.feishu.appId
+$APP_SECRET = $CONFIG.channels.feishu.appSecret
+
+# Step 1: 获取 token
+$TOKEN_RESPONSE = Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal' -Method Post -ContentType 'application/json' -Body (@{app_id=$APP_ID;app_secret=$APP_SECRET} | ConvertTo-Json)
+$TOKEN = $TOKEN_RESPONSE.tenant_access_token
+
+# Step 2: 上传图片
+$IMAGE_RESPONSE = Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/im/v1/images' -Method Post -Headers @{Authorization="Bearer $TOKEN"} -Form @{image_type="message";image=(Get-Item $ImagePath)}
+$IMAGE_KEY = $IMAGE_RESPONSE.data.image_key
+
+# Step 3: 发送消息
+$CONTENT = (@{image_key=$IMAGE_KEY} | ConvertTo-Json -Compress)
+Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id' -Method Post -Headers @{Authorization="Bearer $TOKEN";'Content-Type'='application/json'} -Body (@{receive_id=$ReceiveId;msg_type="image";content=$CONTENT} | ConvertTo-Json)
+
+Write-Host "图片发送成功！image_key: $IMAGE_KEY"
+```
+
+**使用方法**: 当用户要求发送图片时，执行上述 PowerShell 脚本，替换 `$ImagePath` 和 `$ReceiveId` 参数。
+
+---
+
 ## 🧠 豆包向量模型配置（多模态）
 
 | 配置项 | 值 |
