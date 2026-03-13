@@ -72,4 +72,387 @@ Docker build fails on Apple Silicon due to platform mismatch
 - Recurrence-Count: 1
 - First-Seen: 2026-03-10
 
+---## [LRN-20260313-IGF] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T12:15:40.783Z] 你是不是又陷入了死循环
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
 ---
+
+## [LRN-20260313-MLC] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T13:13:36.214Z] 先完成真实数据的测试、前程无忧和拉勾网，这两个网站我没有登录所以你只能用未登录状态测试，所以测试数据应该不多属于正常情况
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-LG0] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:34:38.481Z] 你在网页上看不到吗？网页中应该有一个投递页面然后点进去就可以看到了
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-7M4] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:51:16.047Z] 我投递的职位是：品牌专员、公司是：深圳纬度数据科技股份有限公司、薪资是：8000-13000，你所给的全是错误信息，我们所做的所有事情应该按照实事求是，找到了就是找到了，没找到就是没找到，而不是编造一
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-1QT] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:52:56.261Z] 不是你错了就行，你的学会反思
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-RKT] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T16:14:21.861Z] 我还是没收到，你确定你有这个功能吗？你自己检查一下为什么我收到的是文字，而不是真实的图片
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-B9I] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T16:16:36.949Z] 你检查一下日志，应该是报错了，没有发送成功
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773373076964
+
+---
+
+## [LRN-20260313-17U] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T13:13:36.214Z] 先完成真实数据的测试、前程无忧和拉勾网，这两个网站我没有登录所以你只能用未登录状态测试，所以测试数据应该不多属于正常情况
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773373076964
+
+---
+
+## [LRN-20260313-Z0T] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:56:32.533Z] 你再次查看智联招聘网页，找到我投递的岗位，查看岗位并把信息反馈给我，如果没找到就告诉我没找到原因是什么就好了
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773373076964
+
+---
+
+## [LRN-20260313-DCZ] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:58:45.015Z] 那你在测试投递数据的时候为什么是成功的？你的依据是什么？
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773373076964
+
+---
+
+## [LRN-20260313-5II] best_practice
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T16:16:36.949Z] 你检查一下日志，应该是报错了，没有发送成功
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773373076964
+
+---
+
+## [ERR-20260313-18E] reflection
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T11:52:12.276Z] 继续，先用boss跑一遍，如果不行换成智联，给到我真实网页数据
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773373076964
+
+---
+
+## [ERR-20260313-RXD] reflection
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:04:09.091Z] 继续投递如果还不行再来禁用浏览器拓展投递
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773373076964
+
+---
+
+## [ERR-20260313-YSZ] reflection
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:51:16.047Z] 我投递的职位是：品牌专员、公司是：深圳纬度数据科技股份有限公司、薪资是：8000-13000，你所给的全是错误信息，我们所做的所有事情应该按照实事求是，找到了就是找到了，没找到就是没找到，而不是编造一
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773373076964
+
+---
+
+## [ERR-20260313-5ZL] reflection
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T15:52:56.261Z] 不是你错了就行，你的学会反思
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773373076964
+
+---
+
+## [ERR-20260313-PFD] reflection
+
+**Logged**: 2026-03-13T03:37:56.964Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-12T16:16:36.949Z] 你检查一下日志，应该是报错了，没有发送成功
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773373076964
+
+---
+
