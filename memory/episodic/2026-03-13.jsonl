@@ -55,3 +55,6 @@
 {"timestamp":"2026-03-13T08:57:00.307Z","type":"user_message","id":"EP-1773392220307-lvkl9l","content":"数据呢？还是你又陷入了死循环","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
 {"timestamp":"2026-03-13T09:00:53.273Z","type":"user_message","id":"EP-1773392453273-h8yfsm","content":"你把你的运行逻辑和之前测试的智联真实数据和前程无忧遇到的问题总结出来，去问你的GPT老师","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
 {"timestamp":"2026-03-13T09:03:17.423Z","type":"user_message","id":"EP-1773392597423-2w04ed","content":"要我教你吗？","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
+{"timestamp":"2026-03-13T09:04:35.832Z","type":"user_message","id":"EP-1773392675832-yn6rq0","content":"那你打开自己打开浏览器把你的问题总结给GPT就行了，你之前都这么做的现在又不会了？","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
+{"timestamp":"2026-03-13T09:08:55.049Z","type":"user_message","id":"EP-1773392935049-z9qnrr","content":"你有没有把所有的记忆文件和学习文件做成向量数据库存到vectorbrain 目录下，你现在用的到底是那个记忆系统","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
+{"timestamp":"2026-03-13T09:13:16.148Z","type":"user_message","id":"EP-1773393196148-iqkeg3","content":"把你的记忆库的东西搬家","session_id":"agent:main:main","channel":"webchat","metadata":{"source":"hook"}}
