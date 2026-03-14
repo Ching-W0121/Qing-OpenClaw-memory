@@ -1224,3 +1224,363 @@ review and promote if applicable
 
 ---
 
+## [LRN-20260314-JUC] best_practice
+
+**Logged**: 2026-03-14T04:17:38.549Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T07:09:12.495Z] 智联测试完成后你是不是给了我反馈的信息，那信息里面是不是有相关公司数据？
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773461858549
+
+---
+
+## [LRN-20260314-71R] best_practice
+
+**Logged**: 2026-03-14T04:17:38.549Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T08:32:33.670Z] 所有的投递测试都是一样的流程，都是打开chrome浏览器，我登陆了所以是不需要登陆的，搜索岗位——先排除行业、薪资、地址——点击进入岗位查看jd——匹配度≥80%——点击投递。我现在怀疑你反思系统还是
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773461858549
+
+---
+
+## [LRN-20260314-CBS] best_practice
+
+**Logged**: 2026-03-14T04:17:38.549Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T16:07:35.274Z] 为了防止你再次失忆先把所有对话内容都记忆，如果你聪明的话，你应该以及记忆了，而不是我提醒你
+
+### Details
+通过反思系统自动生成
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, learning
+- Pattern-Key: learning.1773461858549
+
+---
+
+## [LRN-20260314-ZWY] best_practice
+
+**Logged**: 2026-03-14T04:17:38.549Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T07:09:12.495Z] 智联测试完成后你是不是给了我反馈的信息，那信息里面是不是有相关公司数据？
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858549
+
+---
+
+## [LRN-20260314-VE0] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T07:41:47.760Z] ok，我们现在来继续我们的求职agent，智联已经能够真实投递了，你帮我写一句大概内容是：您好，我是王庆的个人求职Ai助手，通过分析匹配贵司的招聘详情，庆的个人经验匹配度挺高的.....这类型的话，总
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [LRN-20260314-OL3] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T07:57:42.786Z] ok，我们来继续完善求职agent，我们做到那一步了
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [LRN-20260314-EFE] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T11:02:54.729Z] https://github.com/liugedapiqiu-dev/vectorbrain，你用chrome浏览器打开这个网站，然后阅读它的使用文档，一步一步完成它
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [LRN-20260314-Z90] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T13:08:10.067Z] 你根据官方文档的步骤一步一步操作就行，对于embedding模型，我们换个模型，我稍后会给你单独配置，你先把其他的都完成
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [LRN-20260314-8ZW] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T14:42:42.888Z] 前程无忧没投递成功，你带着原因去问一下你的gpt老师，告诉他你的运行逻辑还有智联的测试通过数据，以及前程无忧为什么无法看到返回值和自动无法投递
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [LRN-20260314-5Y3] best_practice
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T15:19:00.913Z] 你目前只投递了一个岗位是：品牌策划经理、公司：深圳市冠旭电子股份有限公司、薪资：1.5-2.5万，你回顾一下这个步骤，为什么这个成功了，其余四个没投递上，或者说根本没投递
+
+### Details
+Successful strategy from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, strategy
+- Pattern-Key: strategy.1773461858550
+
+---
+
+## [ERR-20260314-ZX0] reflection
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T08:32:33.670Z] 所有的投递测试都是一样的流程，都是打开chrome浏览器，我登陆了所以是不需要登陆的，搜索岗位——先排除行业、薪资、地址——点击进入岗位查看jd——匹配度≥80%——点击投递。我现在怀疑你反思系统还是
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773461858550
+
+---
+
+## [ERR-20260314-141] reflection
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T14:42:42.888Z] 前程无忧没投递成功，你带着原因去问一下你的gpt老师，告诉他你的运行逻辑还有智联的测试通过数据，以及前程无忧为什么无法看到返回值和自动无法投递
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773461858550
+
+---
+
+## [ERR-20260314-MM1] reflection
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T15:44:09.432Z] 你对于gpt提问这个步骤肯定是出错，你找到昨天晚上21：20，请教GPT：影刀RPA绕过反爬，这个请教内容，然后查看运行的逻辑是什么
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773461858550
+
+---
+
+## [ERR-20260314-8X2] reflection
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T16:51:31.835Z] 那你还是无法读取文本，并且无法输入问题
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773461858550
+
+---
+
+## [ERR-20260314-6BO] reflection
+
+**Logged**: 2026-03-14T04:17:38.550Z
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+[2026-03-13T16:53:03.218Z] 你检查一下为什么无法输入文本为什么不能读取信息
+
+### Details
+Mistake identified from reflection
+
+### Suggested Action
+review and promote if applicable
+
+### Metadata
+- Source: reflection-worker
+- Related Files: memory/semantic/lessons.json
+- Tags: reflection, error
+- Pattern-Key: error.1773461858550
+
+---
+
