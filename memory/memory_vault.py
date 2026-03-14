@@ -16,16 +16,23 @@ import sqlite3
 import json
 import hashlib
 import requests
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+
+# 设置控制台输出编码
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
 import numpy as np
 
 # ==================== 配置 ====================
 
 DB_PATH = Path(__file__).parent / "memory_vault.db"
 DOUBAO_API_KEY = "fddc1778-d04c-403e-8327-ab68ec1ec9dd"
-DOUBAO_API_URL = "https://ark.cn-beijing.volces.com/api/v3/embeddings"
+DOUBAO_API_URL = "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal"
 DOUBAO_MODEL = "doubao-embedding-vision-251215"
 EMBEDDING_DIM = 2048  # 豆包向量维度
 
@@ -88,10 +95,13 @@ def get_embedding(text: str) -> np.ndarray:
         "Content-Type": "application/json"
     }
     
+    # 豆包多模态 embedding API 格式
     payload = {
         "model": DOUBAO_MODEL,
         "encoding_format": "float",
-        "input": [text]
+        "input": [
+            {"type": "text", "text": text}
+        ]
     }
     
     try:
@@ -99,7 +109,7 @@ def get_embedding(text: str) -> np.ndarray:
         response.raise_for_status()
         
         result = response.json()
-        embedding = result['data'][0]['embedding']
+        embedding = result['data']['embedding']
         
         return np.array(embedding, dtype=np.float32)
     
