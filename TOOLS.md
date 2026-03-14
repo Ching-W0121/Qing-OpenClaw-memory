@@ -6,6 +6,18 @@ Skills define _how_ tools work. This file is for _your_ specifics — the stuff 
 
 ## 🧠 Memory System (v3.0)
 
+### ⚠️ 强制检索规则（2026-03-14 新增）
+
+**每次 browser 操作前必须检索**：
+```python
+errors = memory_search("browser automation dynamic page")
+if errors:
+    print("⚠️ 记忆中有相关错误：")
+    print(errors[:3])
+```
+
+**不检索 = 禁止操作**
+
 ### Quick Commands
 
 ```bash
@@ -213,6 +225,46 @@ curl -X POST "https://ark.cn-beijing.volces.com/api/v3/embeddings" \
   }
 }
 ```
+
+## 🌐 动态网页自动化操作指南
+
+**适用**: React/Vue 应用（GPT、招聘网站、现代 Web 应用）
+
+### 正确流程
+
+```
+1. browser.open(url)
+2. await sleep(10)  # 等页面完全加载
+3. snapshot = browser.snapshot()  # 获取新 DOM
+4. browser.act(ref=snapshot.ref)  # 立即使用，不等待
+5. verify = browser.snapshot()  # 验证结果
+```
+
+### 错误流程（避免）
+
+```
+1. snapshot = browser.snapshot()
+2. await sleep(5)  # ❌ 等待导致 ref 失效
+3. browser.act(ref=snapshot.ref)  # ❌ 用旧 ref
+4. 假设成功  # ❌ 不验证
+```
+
+### 关键原则
+
+1. **等待页面加载** - React 需要时间渲染
+2. **snapshot 后立即使用** - ref 只在瞬间有效
+3. **操作后验证** - 检查输入框/消息历史
+4. **失败则重试** - 重新 snapshot 获取新 ref
+
+### 常见失败场景
+
+| 场景 | 原因 | 解决 |
+|------|------|------|
+| GPT 消息发送失败 | 用旧 ref 输入 | 等待 10 秒 + 立即输入 |
+| 前程无忧点击失败 | 页面刷新中操作 | 等刷新完成 + 重新 snapshot |
+| 智联招聘找不到元素 | 不等加载就操作 | 添加 sleep(10) |
+
+---
 
 ## Examples
 

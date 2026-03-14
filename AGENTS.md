@@ -26,6 +26,87 @@ Don't ask permission. Just do it.
 
 **目标**：避免死循环，确保从每次错误中真正学习。
 
+---
+
+## 🚨 强制执行系统（2026-03-14 新增）
+
+### 规则 1: 操作前强制检索记忆
+
+**每次 browser 操作前必须执行**：
+```python
+errors = memory_search("browser automation")
+if errors:
+    print("⚠️ 记忆中有相关错误：")
+    print(errors[:3])
+```
+
+**不检索 = 禁止操作**
+
+---
+
+### 规则 2: 失败计数器（三次原则强制执行）
+
+**追踪每个操作类型的失败次数**：
+- `browser_snapshot`: 0/3
+- `browser_act`: 0/3
+- `browser_open`: 0/3
+- `git_push`: 0/3
+- `file_operation`: 0/3
+
+**达到 3 次 = 强制停止 + 触发反思 + 等待用户指示**
+
+---
+
+### 规则 3: 操作后必须验证
+
+**每次操作后**：
+1. 检查结果（snapshot/文件内容/数据库）
+2. 失败 → 记录 ERRORS.md → 计数器 +1
+3. 计数器≥3 → 触发即时反思
+
+---
+
+### 规则 4: 即时反思触发
+
+**不等 6 小时，立即触发**：
+- 同一错误 3 次
+- 用户明确纠正
+- 关键任务失败
+
+---
+
+## 📋 动态网页操作规范（React/Vue）
+
+**强制流程**：
+```
+1. browser.open(url)
+2. await sleep(10)  # 等页面完全加载
+3. snapshot = browser.snapshot()  # 获取新 DOM
+4. browser.act(ref=snapshot.ref)  # 立即使用，不等待
+5. verify = browser.snapshot()  # 验证结果
+6. if failed: log_error() + failure_count++
+```
+
+**禁止流程**：
+```
+❌ snapshot() → 等待 → 用旧 ref → 失败 → 假设成功
+```
+
+---
+
+## 🚫 死循环预防
+
+**3 次法则**（强制执行）：
+```
+失败 1 次 → 重试（可能是临时问题）
+失败 2 次 → 检查参数/环境
+失败 3 次 → 停止！换方法或求助用户
+```
+
+**真正的 resourceful 是懂得灵活切换策略，不是死磕。**
+
+---
+
 ### 第一重：任务后即时反思（手动）
 
 **触发条件**（满足任一即触发）：
