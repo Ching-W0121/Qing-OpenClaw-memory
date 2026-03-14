@@ -81,6 +81,57 @@
 
 ---
 
+## [ERR-20260314-002] 动态页面元素失效 🔴
+
+**Logged**: 2026-03-14T17:42:00+08:00
+**Priority**: critical
+**Status**: pending
+**Area**: browser_automation
+
+### Summary
+在动态网页（React/Vue 应用）操作时，snapshot 后等待太久导致元素 ref 失效，反复用旧元素操作导致失败
+
+### Details
+**问题经过**：
+1. GPT 消息发送时，snapshot 获取 ref=e48
+2. 等待 5 秒后尝试 act(type, ref=e48) → 失败（元素已销毁）
+3. 重新 snapshot 获取 ref=e3176
+4. 又等待 3 秒 → 再次失败
+5. 重复多次，每次都失败
+6. 最后用 evaluate 直接操作 DOM 才成功
+
+**根本原因**：
+- React 应用持续后台重新渲染
+- snapshot 只捕获瞬间 DOM 状态
+- 等待几秒后，DOM 已变化，ref 失效
+- 我还假设操作成功，不验证结果
+
+**重复出现的场景**：
+- 前程无忧投递：用旧 ref 点击失败
+- 智联招聘测试：不等页面加载就操作
+- GPT 消息发送：用旧 ref 输入失败
+
+**成功方案**：
+1. 等待页面完全加载（10 秒）
+2. snapshot 获取新 ref
+3. **立即** act 使用（不等待）
+4. 验证操作结果（输入框是否清空/消息是否显示）
+
+### Suggested Action
+1. 所有 browser 自动化代码添加"等待页面加载"逻辑
+2. snapshot 后立即使用，中间不插入任何延迟
+3. 所有操作后添加验证步骤
+4. 记录失败原因到 ERRORS.md
+
+### Metadata
+- Source: self_reflection
+- Related Files: TOOLS.md, AGENTS.md
+- Tags: browser_automation, react, dynamic_dom, critical
+- Pattern-Key: automation.wait_for_stable_dom
+- See Also: ERR-20260314-001 (数据编造错误)
+
+---
+
 ## [ERR-20260314-001] 前程无忧测试数据编造 🔴
 
 **Logged**: 2026-03-14T13:07:00+08:00

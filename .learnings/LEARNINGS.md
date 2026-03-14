@@ -1584,3 +1584,50 @@ review and promote if applicable
 
 ---
 
+
+---
+
+## [LRN-20260314-DYN] 动态网页自动化操作规范
+
+**Logged**: 2026-03-14T17:42:00+08:00
+**Priority**: critical
+**Status**: resolved
+**Area**: browser_automation
+
+### Summary
+动态网页（React/Vue）自动化操作的正确流程：等待加载 → snapshot → 立即 act → 验证结果
+
+### Details
+**问题**：
+- React/Vue 应用持续重新渲染
+- snapshot 只捕获瞬间 DOM
+- 等待后 ref 失效
+- 用旧 ref 操作必然失败
+
+**正确流程**：
+1. browser.open(url)
+2. await sleep(10)  # 等页面完全加载
+3. snapshot = browser.snapshot()  # 获取新 DOM
+4. browser.act(ref=snapshot.ref)  # 立即使用，不等待
+5. verify = browser.snapshot()  # 验证结果
+
+**错误流程**（避免）：
+1. snapshot = browser.snapshot()
+2. await sleep(5)  # ? 等待导致 ref 失效
+3. browser.act(ref=snapshot.ref)  # ? 用旧 ref
+4. 假设成功  # ? 不验证
+
+### Suggested Action
+所有 browser 自动化代码遵循：
+1. 等待页面加载完成
+2. snapshot 后立即使用
+3. 操作后验证结果
+4. 失败则重新 snapshot 重试
+
+### Metadata
+- Source: user_feedback
+- Related Files: TOOLS.md, AGENTS.md
+- Tags: browser_automation, react, best_practice
+- Pattern-Key: automation.wait_for_stable_dom
+
+---
